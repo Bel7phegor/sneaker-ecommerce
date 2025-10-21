@@ -23,7 +23,7 @@ jobs:
 
     - name: Build Docker image
       run: |
-        docker build -t ${{ env.IMAGE_VERSION }} .
+        docker build --network=host -t ${{ env.IMAGE_VERSION }} .
         docker images | grep ${{ github.event.repository.name }}
 
   snyk-scan:
@@ -59,7 +59,7 @@ jobs:
         retention-days: 1
 
   trivy-fs-scan:
-    name: Trivy Filesystem Scan
+    name: Trivy Source Code Scan
     runs-on: self-hosted
     needs: build
     
@@ -88,7 +88,7 @@ jobs:
   trivy-image-scan:
     name: Trivy Image Security Scan
     runs-on: self-hosted
-    needs: build
+    needs: [build, trivy-fs-scan]
     
     steps:
     - name: Clean Trivy cache
@@ -119,7 +119,7 @@ jobs:
   deploy:
     name: Deploy Application
     runs-on: self-hosted
-    needs: [build, trivy-image-scan]
+    needs: [build, trivy-fs-scan, trivy-image-scan]
     environment: production  
     
     steps:
