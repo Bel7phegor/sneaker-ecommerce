@@ -136,7 +136,7 @@ jobs:
 
     - name: Set deployment URL output
       run: |
-        echo "DEPLOYMENT_URL=${{ secrets..URL_FE }}:${{ secrets.FE_PORT }}" >> $GITHUB_OUTPUT
+        echo "DEPLOYMENT_URL=${{ secrets.URL_FE }}:${{ secrets.FE_PORT }}" >> $GITHUB_OUTPUT
       id: deployment-output
 
   arachni-website-scan:
