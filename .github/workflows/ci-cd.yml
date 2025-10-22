@@ -130,7 +130,7 @@ jobs:
 
     - name: Deploy new container
       run: |
-        docker run --name ${{ github.event.repository.name }} -dp ${{ secrets.FE_PORT }}:${{ secrets.FE_PORT }} ${{ env.IMAGE_VERSION }}  
+        docker run --name ${{ github.event.repository.name }} -dp 3000:80 ${{ env.IMAGE_VERSION }}  
         sleep 10
         docker ps | grep ${{ github.event.repository.name }}
 
