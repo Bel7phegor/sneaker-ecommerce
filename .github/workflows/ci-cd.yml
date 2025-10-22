@@ -130,13 +130,13 @@ jobs:
 
     - name: Deploy new container
       run: |
-        docker run --name ${{ github.event.repository.name }} -dp ${{ secrets.FE_PORT }}:${{ secrets.FE_PORT }} ${{ env.IMAGE_VERSION }}  
+        docker run --name ${{ github.event.repository.name }} -dp ${{ secrets.FE_PORT }} ${{ env.IMAGE_VERSION }}  
         sleep 10
         docker ps | grep ${{ github.event.repository.name }}
 
     - name: Set deployment URL output
       run: |
-        echo "DEPLOYMENT_URL=${{ secrets.URL_FE }}:${{ secrets.FE_PORT }}" >> $GITHUB_OUTPUT
+        echo "DEPLOYMENT_URL=${{ secrets.URL_FE }}" >> $GITHUB_OUTPUT
       id: deployment-output
 
   arachni-website-scan:
