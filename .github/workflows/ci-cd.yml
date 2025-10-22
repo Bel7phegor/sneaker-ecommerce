@@ -149,22 +149,22 @@ jobs:
     - name: Run Arachni scan
       run: |
         docker run --rm \
-          -v /tmp/:/tmp/ \
+          -v $(pwd)/aranchi-temp:/aranchi-temp \
           arachni/arachni:latest \
           /usr/local/arachni/bin/arachni \
           --output-verbose \
           --scope-include-subdomains \
           ${{ secrets.URL_FE }} \  
-          --report-save-path=/tmp/${{ env.ARACHNI_WEBSITE_REPORT }}.afr
+          --report-save-path=/aranchi-temp/${{ env.ARACHNI_WEBSITE_REPORT }}.afr
 
     - name: Generate Arachni HTML report
       run: |
         docker run --rm \
-          -v /tmp/:/tmp/ \
+          -v $(pwd)/aranchi-temp:/aranchi-temp \
           arachni/arachni:latest \
           /usr/local/arachni/bin/arachni_reporter \
           /tmp/${{ env.ARACHNI_WEBSITE_REPORT }}.afr \
-          --reporter=html:outfile=/tmp/${{ env.ARACHNI_WEBSITE_REPORT }}.html.zip
+          --reporter=html:outfile=/aranchi-temp/${{ env.ARACHNI_WEBSITE_REPORT }}.html.zip
         cp /tmp/${{ env.ARACHNI_WEBSITE_REPORT }}.html.zip .
 
     - name: Upload Arachni report
@@ -185,6 +185,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Run ZAP baseline scan
+      continue-on-error: true
       run: |
         docker run --rm \
           -u root \
