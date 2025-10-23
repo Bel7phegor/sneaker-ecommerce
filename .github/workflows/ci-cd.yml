@@ -149,29 +149,29 @@ jobs:
     - name: Run Arachni scan
       run: |
         docker run --rm \
-          -v $(pwd)/aranchi-temp:/aranchi-temp \
+          -v $(pwd)/arachni-temp/:/arachni-temp/ \
           arachni/arachni:latest \
           /usr/local/arachni/bin/arachni \
           --output-verbose \
           --scope-include-subdomains \
           ${{ secrets.URL_FE }} \  
-          --report-save-path=/aranchi-temp/${{ env.ARACHNI_WEBSITE_REPORT }}.afr
+          --report-save-path=/arachni-temp/${{ env.ARACHNI_WEBSITE_REPORT }}.afr
 
     - name: Generate Arachni HTML report
       run: |
         docker run --rm \
-          -v $(pwd)/aranchi-temp:/aranchi-temp \
+          -v $(pwd)/arachni-temp/:/arachni-temp/ \
           arachni/arachni:latest \
           /usr/local/arachni/bin/arachni_reporter \
-          /tmp/${{ env.ARACHNI_WEBSITE_REPORT }}.afr \
-          --reporter=html:outfile=/aranchi-temp/${{ env.ARACHNI_WEBSITE_REPORT }}.html.zip
-        cp /tmp/${{ env.ARACHNI_WEBSITE_REPORT }}.html.zip .
+          /arachni-temp/${{ env.ARACHNI_WEBSITE_REPORT }}.afr \
+          --reporter=html:outfile=/arachni-temp/${{ env.ARACHNI_WEBSITE_REPORT }}.html.zip
+        sudo chown -R github-runner. ./arachni-temp/
 
     - name: Upload Arachni report
       uses: actions/upload-artifact@v4
       with:
         name: arachni-website-report
-        path: ${{ env.ARACHNI_WEBSITE_REPORT }}.html.zip
+        path: arachni-temp/${{ env.ARACHNI_WEBSITE_REPORT }}.html.zip
         retention-days: 1
 
   zap-website-scan:
@@ -194,7 +194,8 @@ jobs:
           zap-baseline.py \
           -t ${{ secrets.URL_FE }} \  
           -r ${{ env.ZAP_WEBSITE_REPORT }}.html \
-          -I --autooff
+          --autooff
+        sudo chown -R github-runner. $ZAP_WEBSITE_REPORT.html
 
     - name: Upload ZAP report
       uses: actions/upload-artifact@v4
