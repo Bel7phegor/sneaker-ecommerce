@@ -146,6 +146,9 @@ jobs:
     environment: production 
     
     steps:
+    - name: Prepare temp folder
+      run: mkdir -p arachni-temp
+      
     - name: Run Arachni scan
       run: |
         docker run --rm \
@@ -154,7 +157,7 @@ jobs:
           /usr/local/arachni/bin/arachni \
           --output-verbose \
           --scope-include-subdomains \
-          ${{ secrets.URL_FE }} \  
+          "${{ secrets.URL_FE }}" \
           --report-save-path=/arachni-temp/${{ env.ARACHNI_WEBSITE_REPORT }}.afr
 
     - name: Generate Arachni HTML report
@@ -165,7 +168,7 @@ jobs:
           /usr/local/arachni/bin/arachni_reporter \
           /arachni-temp/${{ env.ARACHNI_WEBSITE_REPORT }}.afr \
           --reporter=html:outfile=/arachni-temp/${{ env.ARACHNI_WEBSITE_REPORT }}.html.zip
-        sudo chown -R github-runner. ./arachni-temp/
+        sudo chown -R $(whoami):$(whoami) ./arachni-temp/
 
     - name: Upload Arachni report
       uses: actions/upload-artifact@v4
@@ -192,10 +195,10 @@ jobs:
           -v $(pwd):/zap/wrk/:rw \
           zaproxy/zap-stable \
           zap-baseline.py \
-          -t ${{ secrets.URL_FE }} \  
-          -r ${{ env.ZAP_WEBSITE_REPORT }}.html \
+          -t "${{ secrets.URL_FE }}" \
+          -r "${{ env.ZAP_WEBSITE_REPORT }}.html" \
           --autooff
-        sudo chown -R github-runner. $ZAP_WEBSITE_REPORT.html
+        sudo chown -R $(whoami):$(whoami) "${{ env.ZAP_WEBSITE_REPORT }}.html"
 
     - name: Upload ZAP report
       uses: actions/upload-artifact@v4
