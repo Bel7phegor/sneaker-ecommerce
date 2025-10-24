@@ -1,70 +1,115 @@
-# Getting Started with Create Shoes shop
+# 🛡️ DevSecOps Pipeline Project
 
-This project was bootstrapped with [Create Shoes shop](https://github.com/facebook/create-react-app).
+## 🧩 Introduction
 
-## Available Scripts
+This project simulates and implements a **complete DevSecOps workflow**, focusing on automating security testing within the CI/CD process. The entire pipeline is built on **GitLab CI/CD** and **GitHub Actions**, covering multiple security validation stages including **SAST, SCA, Image Scan**, and **DAST**.
 
-In the project directory, you can run:
+The pipeline represents a realistic DevSecOps workflow — from source code commit to testing, packaging, vulnerability scanning, and application deployment.
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://IP:3000](http://IP:3000) to view it in your browser.
+## ⚙️ Pipeline Workflow
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+**DevSecOps Workflow:**
 
-### `npm test`
+![alt text](images/DevSecOps-workflow.png)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Stage Descriptions:
 
-### `npm run build`
+* **Commit:** Developers push code to the Git repository.
+* **SAST (Static Application Security Testing):** Analyze source code to detect potential security vulnerabilities.
+* **SCA (Software Composition Analysis):** Check third-party dependencies for known vulnerabilities.
+* **Build:** Compile and package the application.
+* **Artifact:** Store verified and tested build packages.
+* **Image Scan:** Scan Docker images for vulnerabilities.
+* **Deploy:** Deploy containers to a local or cloud environment.
+* **DAST (Dynamic Application Security Testing):** Perform dynamic security testing on the running application.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+---
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## 🧰 Tools & Technologies
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+| Purpose                    | Tools / Technologies          |
+| -------------------------- | ----------------------------- |
+| **CI/CD**                  | GitLab CI/CD, GitHub Actions  |
+| **Static Analysis (SAST)** | Snyk                          |
+| **Dependency Scan (SCA)**  | Trivy, OWASP Dependency-Check |
+| **Image Security**         | Aqua Trivy                    |
+| **Dynamic Testing (DAST)** | OWASP ZAP, Arachni            |
+| **Containerization**       | DockerHub, JFrog, Harbor              |
+| **Language / Runtime**     | Node.js, .NET 6, Java, Linux  |
 
-### `npm run eject`
+---
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## 🧱 System Architecture
+👉 Built and deployed the project using a custom [**Dockerfile**](/Dockerfile) \
+👉 Version running on **GitLab Server** using [**.gitlab-ci.yml**](.gitlab-ci.yml) \
+👉 Version running on **GitHub Actions**:
+**[🔗 DevSecOps GitHub Actions Pipeline](https://github.com/Bel7phegor/sneaker-ecommerce/actions/runs/18738830251)**
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Push on **[DockerHub: anphuc2370](https://hub.docker.com/repository/docker/anphuc2370/online-shop-frontend/general)**
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### 🗂️ Security Reports & Artifacts
 
-## Learn More
+All reports generated during pipeline execution are stored in **HTML** format for easy viewing or download.
 
-You can learn more in the [Create Shoes shop documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+* **SAST:** [Snyk Report](./artifacts/snyk_scan.zip)
+* **SCA:** [Trivy Report](./artifacts/trivyfs_scan.zip)
+* **Image Scan:** [Trivy Docker Image Report](./artifacts/trivyfs_scan.zip)
+* **DAST:** [OWASP ZAP Report](./artifacts/zap_scan_website.zip) / [Arachni Report](./artifacts/arachni_scan_website.zip)
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
 
-### Code Splitting
+## **📸 Visual Results**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+**GitLab Pipeline Workflow Result:**
+![alt text](images/gitlab-pipeline.png)
 
-### Analyzing the Bundle Size
+**GitLab Variables:**
+![alt text](images/gitlab-variable.png)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+**Harbor Private Registry:**
+![alt text](images/harbor-homepage.png)
+![alt text](images/harbor-online-shop.png)
 
-### Making a Progressive Web App
+**JFrog Artifacts:**
+![alt text](images/JFrog-Artifacts.png)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+**Application After Deployment:**
+![Home page](images/Homepage.png)
+![Products](images/products.png)
 
-### Advanced Configuration
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## ✅ Achievements
 
-### Deployment
+* Completed a full **DevSecOps pipeline** on both **GitLab** and **GitHub Actions**.
+* Automated security scans for source code, dependencies, and container images.
+* Integrated **dynamic application security testing (DAST)** before deployment.
+* Fully automated the CI/CD process — from build and test to deployment.
+* Implemented and pushed container images to a **Harbor private registry** for secure storage and management.
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## 🌐 Future Development
 
-### `npm run build` fails to minify
+* 🔁 Integrate **K6** for performance testing.
+* ☁️ Expand deployment to **AWS**, leveraging services such as:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+  * **ECR** for Docker image storage.
+  * **ECS / EKS** for containerized application deployment.
+  * **CloudWatch** for log and performance monitoring.
+* 🔒 Add **Secret Scanning** and **Infrastructure as Code Security (IaC Scan)**.
+* 📊 Build a centralized monitoring dashboard with **Grafana + Prometheus**.
+
+---
+
+## 👨‍💻 Author
+
+**Nguyen An Phuc**
+| Fresher DevOps Engineer |
+
+Interested in building secure, automated DevSecOps pipelines and scalable cloud systems.
+
+📧 [phucan2370@gmail.com](mailto:phucan2370@gmail.com)
+🌍 [GitHub](https://github.com/Bel7phegor) | [LinkedIn](https://www.linkedin.com/in/nguyen-an-phuc/)

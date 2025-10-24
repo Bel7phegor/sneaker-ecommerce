@@ -35,8 +35,8 @@ function Header() {
         <Link className="header-main header-section" to="/"><h1>STORE</h1></Link>
         <ul className='header-section'>
         <li><Link to="/shop">SHOP</Link></li>
-          <li><Link to="https://devopsedu.vn/contact/">CONTACT US</Link></li>
-          <li><Link to="https://elroydevops.tech/about/">ABOUT US</Link></li>
+          <li><Link to="https://www.facebook.com/anphuc1203/">CONTACT US</Link></li>
+          <li><Link to="https://www.facebook.com/anphuc1203/">ABOUT US</Link></li>
         </ul>
         <div className='header-tools header-section'>
           <Link to="/account">
