@@ -12,7 +12,9 @@ The pipeline represents a realistic DevSecOps workflow — from source code comm
 
 **DevSecOps Workflow:**
 
-![alt text](images/DevSecOps-workflow.png)
+<p align="center">
+  <img src="images/DevSecOps-workflow.png" alt="Alt text" width="500">
+</p>
 
 ### Stage Descriptions:
 
@@ -64,21 +66,31 @@ All reports generated during pipeline execution are stored in **HTML** format fo
 ## **📸 Visual Results**
 
 **GitLab Pipeline Workflow Result:**
-![alt text](images/gitlab-pipeline.png)
+<p align="center">
+  <img src="images/gitlab-pipeline.png" alt="Alt text" width="800">
+</p>
 
 **GitLab Variables:**
-![alt text](images/gitlab-variable.png)
+<p align="center">
+  <img src="images/gitlab-variable.png" alt="Alt text" width="800">
+</p>
 
 **Harbor Private Registry:**
-![alt text](images/harbor-homepage.png)
-![alt text](images/harbor-online-shop.png)
+<p align="center">
+  <img src="images/harbor-homepage.png" alt="Alt text" width="800">
+  <img src="images/harbor-online-shop.png" alt="Alt text" width="800">
+</p>
 
 **JFrog Artifacts:**
-![alt text](images/JFrog-Artifacts.png)
+<p align="center">
+  <img src="images/JFrog-Artifacts.png" alt="Alt text" width="800">
+</p>
 
 **Application After Deployment:**
-![Home page](images/Homepage.png)
-![Products](images/products.png)
+<p align="center">
+  <img src="images/homepage.png" alt="Alt text" width="800">
+  <img src="images/products.png" alt="Alt text" width="800">
+</p>
 
 ---
 
