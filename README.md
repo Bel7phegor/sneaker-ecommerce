@@ -13,7 +13,7 @@ The pipeline represents a realistic DevSecOps workflow — from source code comm
 **DevSecOps Workflow:**
 
 <p align="center">
-  <img src="images/DevSecOps-workflow.png" alt="Alt text" width="500">
+  <img src="images/DevSecOps-workflow.png" alt="Alt text" width="650">
 </p>
 
 ### Stage Descriptions:
