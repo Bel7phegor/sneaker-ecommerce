@@ -56,7 +56,7 @@ All reports generated during pipeline execution are stored in **HTML** format fo
 
 * **SAST:** [Snyk Report](./artifacts/snyk_scan.zip)
 * **SCA:** [Trivy Report](./artifacts/trivyfs_scan.zip)
-* **Image Scan:** [Trivy Docker Image Report](./artifacts/trivyfs_scan.zip)
+* **Image Scan:** [Trivy Docker Image Report](./artifacts/trivy%20scan%20image.zip)
 * **DAST:** [OWASP ZAP Report](./artifacts/zap_scan_website.zip) / [Arachni Report](./artifacts/arachni_scan_website.zip)
 
 ---
