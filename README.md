@@ -105,14 +105,14 @@ All reports generated during pipeline execution are stored in **HTML** format fo
 
 ## 🌐 Future Development
 
-* 🔁 Integrate **K6** for performance testing.
-* ☁️ Expand deployment to **AWS**, leveraging services such as:
+* Integrate **K6** for performance testing.
+* Expand deployment to **AWS**, leveraging services such as:
 
   * **ECR** for Docker image storage.
   * **ECS / EKS** for containerized application deployment.
   * **CloudWatch** for log and performance monitoring.
-* 🔒 Add **Secret Scanning** and **Infrastructure as Code Security (IaC Scan)**.
-* 📊 Build a centralized monitoring dashboard with **Grafana + Prometheus**.
+* Add **Secret Scanning** and **Infrastructure as Code Security (IaC Scan)**.
+* Build a centralized monitoring dashboard with **Grafana + Prometheus**.
 
 ---
 
