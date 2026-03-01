@@ -58,29 +58,29 @@ All reports generated during pipeline execution are stored in **HTML** format fo
 
 **GitLab Pipeline Workflow Result:**
 <p align="center">
-  <img src="images/gitlab-pipeline.png" alt="Alt text" width="540">
+  <img src="images/gitlab-pipeline.png" alt="Alt text" width="740">
 </p>
 
 **GitLab Variables:**
 <p align="center">
-  <img src="images/gitlab-variable.png" alt="Alt text" width="540">
+  <img src="images/gitlab-variable.png" alt="Alt text" width="740">
 </p>
 
 **Harbor Private Registry:**
 <p align="center">
-  <img src="images/harbor-homepage.png" alt="Alt text" width="540">
-  <img src="images/harbor-online-shop.png" alt="Alt text" width="540">
+  <img src="images/harbor-homepage.png" alt="Alt text" width="740">
+  <img src="images/harbor-online-shop.png" alt="Alt text" width="740">
 </p>
 
 **JFrog Artifacts:**
 <p align="center">
-  <img src="images/JFrog-Artifacts.png" alt="Alt text" width="540">
+  <img src="images/JFrog-Artifacts.png" alt="Alt text" width="740">
 </p>
 
 **Application After Deployment:**
 <p align="center">
-  <img src="images/homepage.png" alt="Alt text" width="540">
-  <img src="images/products.png" alt="Alt text" width="540">
+  <img src="images/homepage.png" alt="Alt text" width="740">
+  <img src="images/products.png" alt="Alt text" width="740">
 </p>
 
 ## Achievements
