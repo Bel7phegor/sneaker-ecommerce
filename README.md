@@ -43,7 +43,7 @@ The pipeline represents a realistic DevSecOps workflow — from source code comm
 👉 Version running on **GitHub Actions**:
 **[🔗 DevSecOps GitHub Actions Pipeline](https://github.com/Bel7phegor/sneaker-ecommerce/actions/runs/18738830251)**
 
-Push on **[DockerHub: anphuc2370](https://hub.docker.com/repository/docker/anphuc2370/online-shop-frontend/general)**
+Push on **[DockerHub: anphuc2370](https://hub.docker.com/r/anphuc2370/online-shop-frontend)**
 
 ### Security Reports & Artifacts
 
