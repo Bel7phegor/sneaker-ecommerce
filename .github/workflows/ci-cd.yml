@@ -16,14 +16,14 @@ jobs:
   build:
     name: Build Docker Image
     runs-on: self-hosted
-    
+    environment: production 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
     - name: Build Docker image
       run: |
-        docker build --network=host -t ${{ env.IMAGE_VERSION }} .
+        docker build --network=host --build-arg REACT_APP_APP_URL=${{ secrets.REACT_APP_APP_URL }} -t ${{ env.IMAGE_VERSION }} .
         docker images | grep ${{ github.event.repository.name }}
 
   snyk-scan:

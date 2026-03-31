@@ -1,8 +1,10 @@
+const API_URL = process.env.REACT_APP_API_URL;
+
 export const variables = {
-    BASE_URL: "http://192.168.254.110:5214/api/",
-    USER_API: "http://192.168.254.110:5214/api/user",
-    PRODUCT_API: "http://192.168.254.110:5214/api/product",
-    ORDER_API: "http://192.168.254.110:5214/api/order",
-    PRODUCTSIZE_API: "http://192.168.254.110:5214/api/productsize",
-    ORDERITEM_API: "http://192.168.254.110:5214/api/orderitem",
+    BASE_URL: `${API_URL}/`,
+    USER_API: `${API_URL}/user`,
+    PRODUCT_API: `${API_URL}/product`,
+    ORDER_API: `${API_URL}/order`,
+    PRODUCTSIZE_API: `${API_URL}/productsize`,
+    ORDERITEM_API: `${API_URL}/orderitem`,
 }
