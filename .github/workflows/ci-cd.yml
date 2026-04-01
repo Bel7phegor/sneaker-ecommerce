@@ -138,7 +138,10 @@ jobs:
         username: ${{ secrets.SERVER_USERNAME }}
         key: ${{ secrets.SERVER_SSH_KEY }}
         script: |
-          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWD }} 
+          sudo su - shoe-shop << 'EOF'
+          
+          echo "${{ secrets.DOCKERHUB_PASSWD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+          
           docker stop ${{ github.event.repository.name }} || true
           docker rm ${{ github.event.repository.name }} || true
 
@@ -147,6 +150,8 @@ jobs:
           
           docker image prune -f
 
+          EOF
+          
   arachni-website-scan:
     name: Arachni Website Security Scan
     runs-on: ubuntu-latest
