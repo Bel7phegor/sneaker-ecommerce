@@ -111,7 +111,7 @@ jobs:
         docker run --rm \
           -v $(pwd):/${{ github.event.repository.name }} \
           -v /var/run/docker.sock:/var/run/docker.sock \
-          aquasec/trivy image \
+          aquasec/trivy:0.69.3 image \
           --format template \
           --template "@contrib/html.tpl" \
           --output /${{ github.event.repository.name }}/${{ env.TRIVY_IMAGE_REPORT }}.html \
