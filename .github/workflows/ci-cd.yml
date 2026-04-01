@@ -212,9 +212,8 @@ jobs:
           zap-baseline.py \
           -t "${{ secrets.URL_FE }}" \
           -r "${{ env.ZAP_WEBSITE_REPORT }}.html" \
-          --autooff
+          --autooff || true
         sudo chown -R $(whoami):$(whoami) "${{ env.ZAP_WEBSITE_REPORT }}.html"
-        fail_action: false
 
     - name: Upload ZAP report
       uses: actions/upload-artifact@v4
