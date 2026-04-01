@@ -151,7 +151,7 @@ jobs:
           docker image prune -f
 
           EOF
-          
+
   arachni-website-scan:
     name: Arachni Website Security Scan
     runs-on: ubuntu-latest
@@ -170,7 +170,7 @@ jobs:
           /usr/local/arachni/bin/arachni \
           --output-verbose \
           --scope-include-subdomains \
-          "${{ secrets.SERVER_HOST }}" \
+          "${{ secrets.URL_FE }}" \
           --report-save-path=/arachni-temp/${{ env.ARACHNI_WEBSITE_REPORT }}.afr
 
     - name: Generate Arachni HTML report
@@ -208,7 +208,7 @@ jobs:
           -v $(pwd):/zap/wrk/:rw \
           zaproxy/zap-stable \
           zap-baseline.py \
-          -t "${{ secrets.SERVER_HOST }}" \
+          -t "${{ secrets.URL_FE }}" \
           -r "${{ env.ZAP_WEBSITE_REPORT }}.html" \
           --autooff
         sudo chown -R $(whoami):$(whoami) "${{ env.ZAP_WEBSITE_REPORT }}.html"
@@ -226,6 +226,13 @@ jobs:
     needs: deploy
     
     steps:
-    - name: Check container logs
-      run: |
-        docker logs ${{ github.event.repository.name }} --tail 50
+    - name: SSH and Check container logs
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        script: |
+          sudo su - shoe-shop << 'EOF'
+          docker logs ${{ github.event.repository.name }} --tail 50
+          EOF
