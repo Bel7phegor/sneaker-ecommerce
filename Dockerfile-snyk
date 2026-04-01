@@ -4,11 +4,14 @@ WORKDIR /app
 COPY . .
 
 RUN npm install -g snyk snyk-to-html
-
+RUN npm install --ignore-scripts || true
 ARG SNYK_AUTH_TOKEN
 ARG OUTPUT_FILENAME
 
 ENV SNYK_AUTH_TOKEN=$SNYK_AUTH_TOKEN
 ENV OUTPUT_FILENAME=$OUTPUT_FILENAME
 
-RUN snyk auth $SNYK_AUTH_TOKEN && snyk test --json | snyk-to-html -o $OUTPUT_FILENAME.html || true
+RUN snyk auth ${SNYK_AUTH_TOKEN} && \
+    (snyk test --all-projects --json > snyk_result.json || true) && \
+    (snyk-to-html -i snyk_result.json -o ${OUTPUT_FILENAME}.html || touch ${OUTPUT_FILENAME}.html)
+#RUN snyk auth $SNYK_AUTH_TOKEN && snyk test --json | snyk-to-html -o $OUTPUT_FILENAME.html || true

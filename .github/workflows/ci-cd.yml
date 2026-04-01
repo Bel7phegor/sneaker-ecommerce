@@ -80,7 +80,7 @@ jobs:
         docker run --rm \
           -v $PWD:/${{ github.event.repository.name }} \
           -v /var/run/docker.sock:/var/run/docker.sock \
-          aquasec/trivy fs /${{ github.event.repository.name }} \
+          aquasec/trivy:0.69.3 fs /${{ github.event.repository.name }} \
           --severity HIGH,CRITICAL \
           --format template \
           --template "@contrib/html.tpl" \
@@ -104,7 +104,7 @@ jobs:
         docker run --rm \
           -v $(pwd):/${{ github.event.repository.name }} \
           -v /var/run/docker.sock:/var/run/docker.sock \
-          aquasec/trivy clean --all
+          aquasec/trivy:0.69.3 clean --all
 
     - name: Scan Docker image with Trivy
       run: |
