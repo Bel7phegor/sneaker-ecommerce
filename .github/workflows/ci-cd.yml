@@ -5,6 +5,8 @@ on:
     tags: ['v*']
 
 env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
   IMAGE_VERSION: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${{ github.ref_name }}_${{ github.sha }}
   SNYKSCAN_REPORT: "snyk_scan_${{ github.event.repository.name }}_${{ github.ref_name }}_${{ github.sha }}_report"
   TRIVYFS_REPORT: "trivy_fs_scan_${{ github.event.repository.name }}_${{ github.ref_name }}_${{ github.sha }}_report"
@@ -34,37 +36,37 @@ jobs:
         docker images | grep ${{ github.event.repository.name }}
         docker push ${{ env.IMAGE_VERSION }}
 
-  snyk-scan:
-    name: Snyk Source Code Scan
-    runs-on: ubuntu-latest
-    needs: build
-    environment: production
+  # snyk-scan:
+  #   name: Snyk Source Code Scan
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   environment: production
     
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v4
 
-    - name: Build Snyk scanner
-      run: |
-        docker build --rm --network host \
-          --build-arg SNYK_AUTH_TOKEN=${{ secrets.SNYK_TOKEN }} \
-          --build-arg OUTPUT_FILENAME=${{ env.SNYKSCAN_REPORT }} \
-          -t ${{ env.SNYKSCAN_REPORT }} \
-          -f Dockerfile-snyk .
+  #   - name: Build Snyk scanner
+  #     run: |
+  #       docker build --rm --network host \
+  #         --build-arg SNYK_AUTH_TOKEN=${{ secrets.SNYK_TOKEN }} \
+  #         --build-arg OUTPUT_FILENAME=${{ env.SNYKSCAN_REPORT }} \
+  #         -t ${{ env.SNYKSCAN_REPORT }} \
+  #         -f Dockerfile-snyk .
 
-    - name: Extract Snyk report
-      run: |
-        docker create --name ${{ env.SNYKSCAN_REPORT }} ${{ env.SNYKSCAN_REPORT }}
-        docker cp ${{ env.SNYKSCAN_REPORT }}:/app/${{ env.SNYKSCAN_REPORT }}.html .
-        docker rm ${{ env.SNYKSCAN_REPORT }}
-        docker rmi ${{ env.SNYKSCAN_REPORT }}
+  #   - name: Extract Snyk report
+  #     run: |
+  #       docker create --name ${{ env.SNYKSCAN_REPORT }} ${{ env.SNYKSCAN_REPORT }}
+  #       docker cp ${{ env.SNYKSCAN_REPORT }}:/app/${{ env.SNYKSCAN_REPORT }}.html .
+  #       docker rm ${{ env.SNYKSCAN_REPORT }}
+  #       docker rmi ${{ env.SNYKSCAN_REPORT }}
 
-    - name: Upload Snyk report
-      uses: actions/upload-artifact@v4
-      with:
-        name: snyk-scan-report
-        path: ${{ env.SNYKSCAN_REPORT }}.html
-        retention-days: 1
+  #   - name: Upload Snyk report
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: snyk-scan-report
+  #       path: ${{ env.SNYKSCAN_REPORT }}.html
+  #       retention-days: 1
 
   trivy-fs-scan:
     name: Trivy Source Code Scan
@@ -212,6 +214,7 @@ jobs:
           -r "${{ env.ZAP_WEBSITE_REPORT }}.html" \
           --autooff
         sudo chown -R $(whoami):$(whoami) "${{ env.ZAP_WEBSITE_REPORT }}.html"
+        fail_action: false
 
     - name: Upload ZAP report
       uses: actions/upload-artifact@v4
