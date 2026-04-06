@@ -17,8 +17,8 @@ env:
 jobs:
   build:
     name: Build Docker Image
-    runs-on: ubuntu-latest
-    environment: production 
+    runs-on: self-hosted
+    environment: production
 
     steps:
     - name: Checkout code
@@ -38,10 +38,10 @@ jobs:
 
   # snyk-scan:
   #   name: Snyk Source Code Scan
-  #   runs-on: ubuntu-latest
+  #   runs-on: self-hosted
   #   needs: build
   #   environment: production
-    
+
   #   steps:
   #   - name: Checkout code
   #     uses: actions/checkout@v4
@@ -70,9 +70,9 @@ jobs:
 
   trivy-fs-scan:
     name: Trivy Source Code Scan
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -97,9 +97,9 @@ jobs:
 
   trivy-image-scan:
     name: Trivy Image Security Scan
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [build, trivy-fs-scan]
-    
+
     steps:
     - name: Clean Trivy cache
       run: |
@@ -128,42 +128,30 @@ jobs:
 
   deploy:
     name: Deploy Application
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [build, trivy-fs-scan, trivy-image-scan]
-    environment: production  
-    
+    environment: production
+
     steps:
-    - name: SSH and Deploy on AWS
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USERNAME }}
-        key: ${{ secrets.SERVER_SSH_KEY }}
-        script: |
-          sudo su - shoe-shop << 'EOF'
-          
-          echo "${{ secrets.DOCKERHUB_PASSWD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-          
-          docker stop ${{ github.event.repository.name }} || true
-          docker rm ${{ github.event.repository.name }} || true
-
-          docker pull ${{ env.IMAGE_VERSION }}
-          docker run --name ${{ github.event.repository.name }} -dp ${{ secrets.FE_PORT }} ${{ env.IMAGE_VERSION }}
-          
-          docker image prune -f
-
-          EOF
+    - name: Deploy on AWS
+      run: |
+        echo "${{ secrets.DOCKERHUB_PASSWD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+        docker stop ${{ github.event.repository.name }} || true
+        docker rm ${{ github.event.repository.name }} || true
+        docker pull ${{ env.IMAGE_VERSION }}
+        docker run --name ${{ github.event.repository.name }} -dp ${{ secrets.FE_PORT }} ${{ env.IMAGE_VERSION }}
+        docker image prune -f
 
   arachni-website-scan:
     name: Arachni Website Security Scan
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: deploy
-    environment: production 
-    
+    environment: production
+
     steps:
     - name: Prepare temp folder
       run: mkdir -p arachni-temp
-      
+
     - name: Run Arachni scan
       run: |
         docker run --rm \
@@ -194,10 +182,10 @@ jobs:
 
   zap-website-scan:
     name: ZAP Website Security Scan
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: deploy
-    environment: production 
-    
+    environment: production
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -224,17 +212,10 @@ jobs:
 
   check-logs:
     name: Check Application Logs
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: deploy
-    
+
     steps:
-    - name: SSH and Check container logs
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USERNAME }}
-        key: ${{ secrets.SERVER_SSH_KEY }}
-        script: |
-          sudo su - shoe-shop << 'EOF'
-          docker logs ${{ github.event.repository.name }} --tail 50
-          EOF
+    - name: Check Application Logs
+      run: |
+        docker logs ${{ github.event.repository.name }} --tail 50
