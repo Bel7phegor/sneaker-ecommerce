@@ -137,13 +137,12 @@ jobs:
           docker rm ${{ github.event.repository.name }} || true
           docker pull ${{ env.IMAGE_VERSION }}
           docker run --name ${{ github.event.repository.name }} \
-            --restart unless-stopped \
-            -dp ${{ secrets.FE_PORT }} 
-            --log-driver=awslogs \
-            --log-opt awslogs-region=${{ env.AWS_REGION }} \
-            --log-opt awslogs-group=/ec2/${{ github.event.repository.name }} \
-            --log-opt awslogs-create-group=true \
-            ${{ env.IMAGE_VERSION }}
+          -dp ${{ secrets.FE_PORT }} \
+          --log-driver=awslogs \
+          --log-opt awslogs-region=${{ env.AWS_REGION }} \
+          --log-opt awslogs-group=/ec2/${{ github.event.repository.name }} \
+          --log-opt awslogs-create-group=true \
+          ${{ env.IMAGE_VERSION }}
         
           docker image prune -f
         '
