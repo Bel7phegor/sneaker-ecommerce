@@ -14,4 +14,4 @@ ENV OUTPUT_FILENAME=$OUTPUT_FILENAME
 RUN snyk auth ${SNYK_AUTH_TOKEN} || true ; \
     snyk test --all-projects --json > snyk_result.json || true ; \
     snyk-to-html -i snyk_result.json -o ${OUTPUT_FILENAME}.html || true ; \
-    touch ${OUTPUT_FILENAME}.htm
+    touch ${OUTPUT_FILENAME}.html
