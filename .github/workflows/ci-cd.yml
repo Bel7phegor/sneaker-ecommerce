@@ -1,3 +1,4 @@
+
 name: CI/CD Pipeline
 
 on:
@@ -6,7 +7,7 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
+  USER_PROJECT: ${{ secrets.USER_PROJECT }}
   IMAGE_VERSION: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${{ github.ref_name }}_${{ github.sha }}
   SNYKSCAN_REPORT: "snyk_scan_${{ github.event.repository.name }}_${{ github.ref_name }}_${{ github.sha }}_report"
   TRIVYFS_REPORT: "trivy_fs_scan_${{ github.event.repository.name }}_${{ github.ref_name }}_${{ github.sha }}_report"
@@ -35,38 +36,37 @@ jobs:
         docker build --network=host --build-arg REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }} -t ${{ env.IMAGE_VERSION }} .
         docker images | grep ${{ github.event.repository.name }}
         docker push ${{ env.IMAGE_VERSION }}
+  snyk-scan:
+    name: Snyk Source Code Scan
+    runs-on: self-hosted
+    needs: build
+    environment: production
 
-  # snyk-scan:
-  #   name: Snyk Source Code Scan
-  #   runs-on: self-hosted
-  #   needs: build
-  #   environment: production
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-  #   steps:
-  #   - name: Checkout code
-  #     uses: actions/checkout@v4
+    - name: Build Snyk scanner
+      run: |
+        docker build --rm --network host \
+          --build-arg SNYK_AUTH_TOKEN=${{ secrets.SNYK_TOKEN }} \
+          --build-arg OUTPUT_FILENAME=${{ env.SNYKSCAN_REPORT }} \
+          -t ${{ env.SNYKSCAN_REPORT }} \
+          -f Dockerfile-snyk .
 
-  #   - name: Build Snyk scanner
-  #     run: |
-  #       docker build --rm --network host \
-  #         --build-arg SNYK_AUTH_TOKEN=${{ secrets.SNYK_TOKEN }} \
-  #         --build-arg OUTPUT_FILENAME=${{ env.SNYKSCAN_REPORT }} \
-  #         -t ${{ env.SNYKSCAN_REPORT }} \
-  #         -f Dockerfile-snyk .
+    - name: Extract Snyk report
+      run: |
+        docker create --name ${{ env.SNYKSCAN_REPORT }} ${{ env.SNYKSCAN_REPORT }}
+        docker cp ${{ env.SNYKSCAN_REPORT }}:/app/${{ env.SNYKSCAN_REPORT }}.html .
+        docker rm ${{ env.SNYKSCAN_REPORT }}
+        docker rmi ${{ env.SNYKSCAN_REPORT }}
 
-  #   - name: Extract Snyk report
-  #     run: |
-  #       docker create --name ${{ env.SNYKSCAN_REPORT }} ${{ env.SNYKSCAN_REPORT }}
-  #       docker cp ${{ env.SNYKSCAN_REPORT }}:/app/${{ env.SNYKSCAN_REPORT }}.html .
-  #       docker rm ${{ env.SNYKSCAN_REPORT }}
-  #       docker rmi ${{ env.SNYKSCAN_REPORT }}
-
-  #   - name: Upload Snyk report
-  #     uses: actions/upload-artifact@v4
-  #     with:
-  #       name: snyk-scan-report
-  #       path: ${{ env.SNYKSCAN_REPORT }}.html
-  #       retention-days: 1
+    - name: Upload Snyk report
+      uses: actions/upload-artifact@v4
+      with:
+        name: snyk-scan-report
+        path: ${{ env.SNYKSCAN_REPORT }}.html
+        retention-days: 1
 
   trivy-fs-scan:
     name: Trivy Source Code Scan
@@ -87,7 +87,6 @@ jobs:
           --format template \
           --template "@contrib/html.tpl" \
           --output /${{ github.event.repository.name }}/${{ env.TRIVYFS_REPORT }}.html
-
     - name: Upload Trivy FS report
       uses: actions/upload-artifact@v4
       with:
@@ -107,7 +106,6 @@ jobs:
           -v $(pwd):/${{ github.event.repository.name }} \
           -v /var/run/docker.sock:/var/run/docker.sock \
           aquasec/trivy:0.69.3 clean --all
-
     - name: Scan Docker image with Trivy
       run: |
         docker run --rm \
@@ -118,7 +116,6 @@ jobs:
           --template "@contrib/html.tpl" \
           --output /${{ github.event.repository.name }}/${{ env.TRIVY_IMAGE_REPORT }}.html \
           ${{ env.IMAGE_VERSION }}
-
     - name: Upload Trivy image report
       uses: actions/upload-artifact@v4
       with:
@@ -135,13 +132,14 @@ jobs:
     steps:
     - name: Deploy on AWS
       run: |
-        echo "${{ secrets.DOCKERHUB_PASSWD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-        docker stop ${{ github.event.repository.name }} || true
-        docker rm ${{ github.event.repository.name }} || true
-        docker pull ${{ env.IMAGE_VERSION }}
-        docker run --name ${{ github.event.repository.name }} -dp ${{ secrets.FE_PORT }} ${{ env.IMAGE_VERSION }}
-        docker image prune -f
-
+        sudo su ${{ secrets.USER_PROJECT }} -c '
+          echo "${{ secrets.DOCKERHUB_PASSWD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+          docker stop ${{ github.event.repository.name }} || true
+          docker rm ${{ github.event.repository.name }} || true
+          docker pull ${{ env.IMAGE_VERSION }}
+          docker run --name ${{ github.event.repository.name }} --restart unless-stopped -dp ${{ secrets.FE_PORT }} ${{ env.IMAGE_VERSION }}
+          docker image prune -f
+        '
   arachni-website-scan:
     name: Arachni Website Security Scan
     runs-on: self-hosted
@@ -162,7 +160,6 @@ jobs:
           --scope-include-subdomains \
           "${{ secrets.URL_FE }}" \
           --report-save-path=/arachni-temp/${{ env.ARACHNI_WEBSITE_REPORT }}.afr
-
     - name: Generate Arachni HTML report
       run: |
         docker run --rm \
@@ -172,7 +169,6 @@ jobs:
           /arachni-temp/${{ env.ARACHNI_WEBSITE_REPORT }}.afr \
           --reporter=html:outfile=/arachni-temp/${{ env.ARACHNI_WEBSITE_REPORT }}.html.zip
         sudo chown -R $(whoami):$(whoami) ./arachni-temp/
-
     - name: Upload Arachni report
       uses: actions/upload-artifact@v4
       with:
@@ -202,7 +198,6 @@ jobs:
           -r "${{ env.ZAP_WEBSITE_REPORT }}.html" \
           --autooff || true
         sudo chown -R $(whoami):$(whoami) "${{ env.ZAP_WEBSITE_REPORT }}.html"
-
     - name: Upload ZAP report
       uses: actions/upload-artifact@v4
       with:
