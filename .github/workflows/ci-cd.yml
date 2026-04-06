@@ -211,12 +211,12 @@ jobs:
         path: ${{ env.ZAP_WEBSITE_REPORT }}.html
         retention-days: 1
 
-  # check-logs:
-  #   name: Check Application Logs
-  #   runs-on: self-hosted
-  #   needs: deploy
+  check-logs:
+    name: Check Application Logs
+    runs-on: self-hosted
+    needs: deploy
 
-  #   steps:
-  #   - name: Check Application Logs
-  #     run: |
-  #       docker logs ${{ github.event.repository.name }} --tail 50
+    steps:
+    - name: Check Application Logs
+      run: |
+        docker logs ${{ github.event.repository.name }} --tail 50
