@@ -40,7 +40,7 @@ jobs:
     
     - name: Build Docker image
       run: |
-        docker build --network=host --build-arg REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }} -t ${{ env.IMAGE_VERSION }} -t ${{ env.IMAGE_LATEST }}.
+        docker build --network=host --build-arg REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }} -t ${{ env.IMAGE_VERSION }} -t ${{ env.IMAGE_LATEST }} .
         docker images | grep ${{ github.event.repository.name }}
         docker push ${{ env.IMAGE_VERSION }}
         docker push ${{ env.IMAGE_LATEST }}
