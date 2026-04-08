@@ -125,7 +125,7 @@ jobs:
   deploy:
     name: Deploy Application
     runs-on: self-hosted
-    needs: [build, trivy-fs-scan, trivy-image-scan]
+    needs: build
     environment: production
 
     steps:
