@@ -5,25 +5,34 @@ on:
     tags: ['v*']
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
   USER_PROJECT: ${{ secrets.USER_PROJECT }}
   AWS_REGION: "ap-southeast-1"
   IMAGE_VERSION: ${{ secrets.ECR_REGISTRY }}/${{ github.event.repository.name }}:${{ github.ref_name }}_${{ github.sha }}
+  IMAGE_LATEST: ${{ secrets.ECR_REGISTRY }}/${{ github.event.repository.name }}:latest
   SNYKSCAN_REPORT: "snyk_scan_${{ github.event.repository.name }}_${{ github.ref_name }}_${{ github.sha }}_report"
   TRIVYFS_REPORT: "trivy_fs_scan_${{ github.event.repository.name }}_${{ github.ref_name }}_${{ github.sha }}_report"
   TRIVY_IMAGE_REPORT: "security_scan_image_${{ github.event.repository.name }}_${{ github.ref_name }}_${{ github.sha }}_report"
   ARACHNI_WEBSITE_REPORT: "arachni_scan_website_${{ github.event.repository.name }}_${{ github.ref_name }}_${{ github.sha }}_report"
   ZAP_WEBSITE_REPORT: "zap_scan_website_${{ github.event.repository.name }}_${{ github.ref_name }}_${{ github.sha }}_report"
+  ASG_NAME: "auto-scaling-gr-lab"
 
 jobs:
   build:
     name: Build Docker Image
-    runs-on: self-hosted
-    environment: production
+    runs-on: ubuntu-latest
+    environment: production, AWS_SECRET
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
+    - name: Configure AWS Credentials
+      user: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
 
     - name: Login to Amazone ECR
       run: |
@@ -31,13 +40,14 @@ jobs:
     
     - name: Build Docker image
       run: |
-        docker build --network=host --build-arg REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }} -t ${{ env.IMAGE_VERSION }} .
+        docker build --network=host --build-arg REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }} -t ${{ env.IMAGE_VERSION }} -t {{ env.IMAGE_LATEST }}.
         docker images | grep ${{ github.event.repository.name }}
         docker push ${{ env.IMAGE_VERSION }}
+        docker push ${{ env.IMAGE_LATEST }}
 
   # snyk-scan:
   #   name: Snyk Source Code Scan
-  #   runs-on: self-hosted
+  #   runs-on: ubuntu-latest
   #   needs: build
   #   environment: production
 
@@ -69,7 +79,7 @@ jobs:
 
   # trivy-fs-scan:
   #   name: Trivy Source Code Scan
-  #   runs-on: self-hosted
+  #   runs-on: ubuntu-latest
   #   needs: build
 
   #   steps:
@@ -95,7 +105,7 @@ jobs:
 
   # trivy-image-scan:
   #   name: Trivy Image Security Scan
-  #   runs-on: self-hosted
+  #   runs-on: ubuntu-latest
   #   needs: [build, trivy-fs-scan]
 
   #   steps:
@@ -124,14 +134,28 @@ jobs:
 
   deploy:
     name: Deploy Application
-    runs-on: self-hosted
-    needs: build
-    environment: production
+    runs-on: ubuntu-latest
+    needs: [build]
+    environment: production, AWS_SECRET
 
     steps:
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with: 
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Trigger ASG Instance Refresh
+      run: |
+        aws autoscaling start-instance-refresh \
+          --auto-scaling-group-name ${{ env.ASG_NAME }} \
+          --preferences '{"MinHealthyPercentage": 50, "InstanceWarmup": 60}'
+
     - name: Deploy on AWS with CloudWatch Logs
       run: |
         sudo su ${{ secrets.USER_PROJECT }} -c '
+
           aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
           docker stop ${{ github.event.repository.name }} || true
           docker rm ${{ github.event.repository.name }} || true
@@ -149,7 +173,7 @@ jobs:
         '
   # arachni-website-scan:
   #   name: Arachni Website Security Scan
-  #   runs-on: self-hosted
+  #   runs-on: ubuntu-latest
   #   needs: deploy
   #   environment: production
 
@@ -185,7 +209,7 @@ jobs:
 
   # zap-website-scan:
   #   name: ZAP Website Security Scan
-  #   runs-on: self-hosted
+  #   runs-on: ubuntu-latest
   #   needs: deploy
   #   environment: production
 
@@ -212,12 +236,12 @@ jobs:
   #       path: ${{ env.ZAP_WEBSITE_REPORT }}.html
   #       retention-days: 1
 
-  check-logs:
-    name: Check Application Logs
-    runs-on: self-hosted
-    needs: deploy
+  # check-logs:
+  #   name: Check Application Logs
+  #   runs-on: ubuntu-latest
+  #   needs: deploy
 
-    steps:
-    - name: Check Application Logs
-      run: |
-        docker logs ${{ github.event.repository.name }} --tail 50
+  #   steps:
+  #   - name: Check Application Logs
+  #     run: |
+  #       docker logs ${{ github.event.repository.name }} --tail 50
