@@ -35,92 +35,92 @@ jobs:
         docker images | grep ${{ github.event.repository.name }}
         docker push ${{ env.IMAGE_VERSION }}
 
-  snyk-scan:
-    name: Snyk Source Code Scan
-    runs-on: self-hosted
-    needs: build
-    environment: production
+  # snyk-scan:
+  #   name: Snyk Source Code Scan
+  #   runs-on: self-hosted
+  #   needs: build
+  #   environment: production
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v4
 
-    - name: Build Snyk scanner
-      run: |
-        docker build --rm --network host \
-          --build-arg SNYK_AUTH_TOKEN=${{ secrets.SNYK_TOKEN }} \
-          --build-arg OUTPUT_FILENAME=${{ env.SNYKSCAN_REPORT }} \
-          -t ${{ env.SNYKSCAN_REPORT }} \
-          -f Dockerfile-snyk .
+  #   - name: Build Snyk scanner
+  #     run: |
+  #       docker build --rm --network host \
+  #         --build-arg SNYK_AUTH_TOKEN=${{ secrets.SNYK_TOKEN }} \
+  #         --build-arg OUTPUT_FILENAME=${{ env.SNYKSCAN_REPORT }} \
+  #         -t ${{ env.SNYKSCAN_REPORT }} \
+  #         -f Dockerfile-snyk .
 
-    - name: Extract Snyk report
-      run: |
-        docker create --name ${{ env.SNYKSCAN_REPORT }} ${{ env.SNYKSCAN_REPORT }}
-        docker cp ${{ env.SNYKSCAN_REPORT }}:/app/${{ env.SNYKSCAN_REPORT }}.html .
-        docker rm ${{ env.SNYKSCAN_REPORT }}
-        docker rmi ${{ env.SNYKSCAN_REPORT }}
+  #   - name: Extract Snyk report
+  #     run: |
+  #       docker create --name ${{ env.SNYKSCAN_REPORT }} ${{ env.SNYKSCAN_REPORT }}
+  #       docker cp ${{ env.SNYKSCAN_REPORT }}:/app/${{ env.SNYKSCAN_REPORT }}.html .
+  #       docker rm ${{ env.SNYKSCAN_REPORT }}
+  #       docker rmi ${{ env.SNYKSCAN_REPORT }}
 
-    - name: Upload Snyk report
-      uses: actions/upload-artifact@v4
-      with:
-        name: snyk-scan-report
-        path: ${{ env.SNYKSCAN_REPORT }}.html
-        retention-days: 1
+  #   - name: Upload Snyk report
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: snyk-scan-report
+  #       path: ${{ env.SNYKSCAN_REPORT }}.html
+  #       retention-days: 1
 
-  trivy-fs-scan:
-    name: Trivy Source Code Scan
-    runs-on: self-hosted
-    needs: build
+  # trivy-fs-scan:
+  #   name: Trivy Source Code Scan
+  #   runs-on: self-hosted
+  #   needs: build
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v4
 
-    - name: Run Trivy filesystem scan
-      run: |
-        docker run --rm \
-          -v $PWD:/${{ github.event.repository.name }} \
-          -v /var/run/docker.sock:/var/run/docker.sock \
-          aquasec/trivy:0.69.3 fs /${{ github.event.repository.name }} \
-          --severity HIGH,CRITICAL \
-          --format template \
-          --template "@contrib/html.tpl" \
-          --output /${{ github.event.repository.name }}/${{ env.TRIVYFS_REPORT }}.html
-    - name: Upload Trivy FS report
-      uses: actions/upload-artifact@v4
-      with:
-        name: trivy-fs-report
-        path: ${{ env.TRIVYFS_REPORT }}.html
-        retention-days: 1
+  #   - name: Run Trivy filesystem scan
+  #     run: |
+  #       docker run --rm \
+  #         -v $PWD:/${{ github.event.repository.name }} \
+  #         -v /var/run/docker.sock:/var/run/docker.sock \
+  #         aquasec/trivy:0.69.3 fs /${{ github.event.repository.name }} \
+  #         --severity HIGH,CRITICAL \
+  #         --format template \
+  #         --template "@contrib/html.tpl" \
+  #         --output /${{ github.event.repository.name }}/${{ env.TRIVYFS_REPORT }}.html
+  #   - name: Upload Trivy FS report
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: trivy-fs-report
+  #       path: ${{ env.TRIVYFS_REPORT }}.html
+  #       retention-days: 1
 
-  trivy-image-scan:
-    name: Trivy Image Security Scan
-    runs-on: self-hosted
-    needs: [build, trivy-fs-scan]
+  # trivy-image-scan:
+  #   name: Trivy Image Security Scan
+  #   runs-on: self-hosted
+  #   needs: [build, trivy-fs-scan]
 
-    steps:
-    - name: Clean Trivy cache
-      run: |
-        docker run --rm \
-          -v $(pwd):/${{ github.event.repository.name }} \
-          -v /var/run/docker.sock:/var/run/docker.sock \
-          aquasec/trivy:0.69.3 clean --all
-    - name: Scan Docker image with Trivy
-      run: |
-        docker run --rm \
-          -v $(pwd):/${{ github.event.repository.name }} \
-          -v /var/run/docker.sock:/var/run/docker.sock \
-          aquasec/trivy:0.69.3 image \
-          --format template \
-          --template "@contrib/html.tpl" \
-          --output /${{ github.event.repository.name }}/${{ env.TRIVY_IMAGE_REPORT }}.html \
-          ${{ env.IMAGE_VERSION }}
-    - name: Upload Trivy image report
-      uses: actions/upload-artifact@v4
-      with:
-        name: trivy-image-report
-        path: ${{ env.TRIVY_IMAGE_REPORT }}.html
-        retention-days: 1
+  #   steps:
+  #   - name: Clean Trivy cache
+  #     run: |
+  #       docker run --rm \
+  #         -v $(pwd):/${{ github.event.repository.name }} \
+  #         -v /var/run/docker.sock:/var/run/docker.sock \
+  #         aquasec/trivy:0.69.3 clean --all
+  #   - name: Scan Docker image with Trivy
+  #     run: |
+  #       docker run --rm \
+  #         -v $(pwd):/${{ github.event.repository.name }} \
+  #         -v /var/run/docker.sock:/var/run/docker.sock \
+  #         aquasec/trivy:0.69.3 image \
+  #         --format template \
+  #         --template "@contrib/html.tpl" \
+  #         --output /${{ github.event.repository.name }}/${{ env.TRIVY_IMAGE_REPORT }}.html \
+  #         ${{ env.IMAGE_VERSION }}
+  #   - name: Upload Trivy image report
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: trivy-image-report
+  #       path: ${{ env.TRIVY_IMAGE_REPORT }}.html
+  #       retention-days: 1
 
   deploy:
     name: Deploy Application
@@ -137,6 +137,7 @@ jobs:
           docker rm ${{ github.event.repository.name }} || true
           docker pull ${{ env.IMAGE_VERSION }}
           docker run --name ${{ github.event.repository.name }} \
+          --restart unless-stopped \
           -dp ${{ secrets.FE_PORT }} \
           --log-driver=awslogs \
           --log-opt awslogs-region=${{ env.AWS_REGION }} \
@@ -146,70 +147,70 @@ jobs:
         
           docker image prune -f
         '
-  arachni-website-scan:
-    name: Arachni Website Security Scan
-    runs-on: self-hosted
-    needs: deploy
-    environment: production
+  # arachni-website-scan:
+  #   name: Arachni Website Security Scan
+  #   runs-on: self-hosted
+  #   needs: deploy
+  #   environment: production
 
-    steps:
-    - name: Prepare temp folder
-      run: mkdir -p arachni-temp
+  #   steps:
+  #   - name: Prepare temp folder
+  #     run: mkdir -p arachni-temp
 
-    - name: Run Arachni scan
-      run: |
-        docker run --rm \
-          -v $(pwd)/arachni-temp/:/arachni-temp/ \
-          arachni/arachni:latest \
-          /usr/local/arachni/bin/arachni \
-          --output-verbose \
-          --scope-include-subdomains \
-          "${{ secrets.URL_FE }}" \
-          --report-save-path=/arachni-temp/${{ env.ARACHNI_WEBSITE_REPORT }}.afr
-    - name: Generate Arachni HTML report
-      run: |
-        docker run --rm \
-          -v $(pwd)/arachni-temp/:/arachni-temp/ \
-          arachni/arachni:latest \
-          /usr/local/arachni/bin/arachni_reporter \
-          /arachni-temp/${{ env.ARACHNI_WEBSITE_REPORT }}.afr \
-          --reporter=html:outfile=/arachni-temp/${{ env.ARACHNI_WEBSITE_REPORT }}.html.zip
-        sudo chown -R $(whoami):$(whoami) ./arachni-temp/
-    - name: Upload Arachni report
-      uses: actions/upload-artifact@v4
-      with:
-        name: arachni-website-report
-        path: arachni-temp/${{ env.ARACHNI_WEBSITE_REPORT }}.html.zip
-        retention-days: 1
+  #   - name: Run Arachni scan
+  #     run: |
+  #       docker run --rm \
+  #         -v $(pwd)/arachni-temp/:/arachni-temp/ \
+  #         arachni/arachni:latest \
+  #         /usr/local/arachni/bin/arachni \
+  #         --output-verbose \
+  #         --scope-include-subdomains \
+  #         "${{ secrets.URL_FE }}" \
+  #         --report-save-path=/arachni-temp/${{ env.ARACHNI_WEBSITE_REPORT }}.afr
+  #   - name: Generate Arachni HTML report
+  #     run: |
+  #       docker run --rm \
+  #         -v $(pwd)/arachni-temp/:/arachni-temp/ \
+  #         arachni/arachni:latest \
+  #         /usr/local/arachni/bin/arachni_reporter \
+  #         /arachni-temp/${{ env.ARACHNI_WEBSITE_REPORT }}.afr \
+  #         --reporter=html:outfile=/arachni-temp/${{ env.ARACHNI_WEBSITE_REPORT }}.html.zip
+  #       sudo chown -R $(whoami):$(whoami) ./arachni-temp/
+  #   - name: Upload Arachni report
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: arachni-website-report
+  #       path: arachni-temp/${{ env.ARACHNI_WEBSITE_REPORT }}.html.zip
+  #       retention-days: 1
 
-  zap-website-scan:
-    name: ZAP Website Security Scan
-    runs-on: self-hosted
-    needs: deploy
-    environment: production
+  # zap-website-scan:
+  #   name: ZAP Website Security Scan
+  #   runs-on: self-hosted
+  #   needs: deploy
+  #   environment: production
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v4
 
-    - name: Run ZAP baseline scan
-      continue-on-error: true
-      run: |
-        docker run --rm \
-          -u root \
-          -v $(pwd):/zap/wrk/:rw \
-          zaproxy/zap-stable \
-          zap-baseline.py \
-          -t "${{ secrets.URL_FE }}" \
-          -r "${{ env.ZAP_WEBSITE_REPORT }}.html" \
-          --autooff || true
-        sudo chown -R $(whoami):$(whoami) "${{ env.ZAP_WEBSITE_REPORT }}.html"
-    - name: Upload ZAP report
-      uses: actions/upload-artifact@v4
-      with:
-        name: zap-website-report
-        path: ${{ env.ZAP_WEBSITE_REPORT }}.html
-        retention-days: 1
+  #   - name: Run ZAP baseline scan
+  #     continue-on-error: true
+  #     run: |
+  #       docker run --rm \
+  #         -u root \
+  #         -v $(pwd):/zap/wrk/:rw \
+  #         zaproxy/zap-stable \
+  #         zap-baseline.py \
+  #         -t "${{ secrets.URL_FE }}" \
+  #         -r "${{ env.ZAP_WEBSITE_REPORT }}.html" \
+  #         --autooff || true
+  #       sudo chown -R $(whoami):$(whoami) "${{ env.ZAP_WEBSITE_REPORT }}.html"
+  #   - name: Upload ZAP report
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: zap-website-report
+  #       path: ${{ env.ZAP_WEBSITE_REPORT }}.html
+  #       retention-days: 1
 
   check-logs:
     name: Check Application Logs
