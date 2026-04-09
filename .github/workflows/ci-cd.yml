@@ -61,7 +61,7 @@ jobs:
           -e SNYK_TOKEN=${{ secrets.SNYK_TOKEN }} \
           -v $(pwd):/app \
           -w /app \
-          snyk/snyk:node-preview sh -c "
+          snyk/snyk:node sh -c "
             npm install --ignore-scripts
             snyk test --all-projects --json > snyk_result.json || true
             npm install -g snyk-to-html
@@ -84,6 +84,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+  
     - name: Run Trivy filesystem scan
       run: |
         docker run --rm \
@@ -113,6 +120,7 @@ jobs:
           -v $(pwd):/${{ github.event.repository.name }} \
           -v /var/run/docker.sock:/var/run/docker.sock \
           aquasec/trivy:0.69.3 clean --all
+
     - name: Scan Docker image with Trivy
       run: |
         docker run --rm \
@@ -123,6 +131,7 @@ jobs:
           --template "@contrib/html.tpl" \
           --output /${{ github.event.repository.name }}/${{ env.TRIVY_IMAGE_REPORT }}.html \
           ${{ env.IMAGE_VERSION }}
+
     - name: Upload Trivy image report
       uses: actions/upload-artifact@v4
       with:
@@ -189,6 +198,7 @@ jobs:
           --scope-include-subdomains \
           "${{ secrets.URL_FE }}" \
           --report-save-path=/arachni-temp/${{ env.ARACHNI_WEBSITE_REPORT }}.afr
+
     - name: Generate Arachni HTML report
       run: |
         docker run --rm \
