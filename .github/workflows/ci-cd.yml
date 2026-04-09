@@ -58,15 +58,11 @@ jobs:
     - name: Run Snyk Scan and Generate Report
       run: |
         docker run --rm \
+          --entrypoint /bin/sh \
           -e SNYK_TOKEN=${{ secrets.SNYK_TOKEN }} \
           -v $(pwd):/app \
           -w /app \
-          snyk/snyk:node sh -c "
-            npm install --ignore-scripts
-            snyk test --all-projects --json > snyk_result.json || true
-            npm install -g snyk-to-html
-            snyk-to-html -i snyk_result.json -o ${{ env.SNYKSCAN_REPORT }}.html
-          "
+          snyk/snyk:node -c "npm install --ignore-scripts ; snyk test --all-projects --json > snyk_result.json || true ; npm install -g snyk-to-html ; snyk-to-html -i snyk_result.json -o ${{ env.SNYKSCAN_REPORT }}.html"
 
     - name: Upload Snyk report
       uses: actions/upload-artifact@v4
@@ -83,13 +79,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
   
     - name: Run Trivy filesystem scan
       run: |
@@ -101,6 +90,7 @@ jobs:
           --format template \
           --template "@contrib/html.tpl" \
           --output /${{ github.event.repository.name }}/${{ env.TRIVYFS_REPORT }}.html
+
     - name: Upload Trivy FS report
       uses: actions/upload-artifact@v4
       with:
@@ -120,6 +110,13 @@ jobs:
           -v $(pwd):/${{ github.event.repository.name }} \
           -v /var/run/docker.sock:/var/run/docker.sock \
           aquasec/trivy:0.69.3 clean --all
+          
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
 
     - name: Scan Docker image with Trivy
       run: |
