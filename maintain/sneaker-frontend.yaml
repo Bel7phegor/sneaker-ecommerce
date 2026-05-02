@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sneaker-frontend-deployment
+  namespace: sneaker-shop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sneaker-frontend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: sneaker-frontend
+    spec:
+      containers:
+        - name: sneaker-frontend
+          image: 250830191861.dkr.ecr.ap-southeast-1.amazonaws.com/onlineshop/sneaker-ecommerce:latest
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sneaker-frontend-service
+  namespace: sneaker-shop
+spec:
+  type: ClusterIP
+  selector:
+    app: sneaker-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sneaker-frontend-ingress
+  namespace: sneaker-shop
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: sneaker.anphuc.site
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: sneaker-frontend-service
+              port:
+                number: 80
+
