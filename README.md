@@ -102,12 +102,8 @@ All reports generated during pipeline execution are stored in **HTML** format fo
 * Add **Secret Scanning** and **Infrastructure as Code Security (IaC Scan)**.
 * Build a centralized monitoring dashboard with **Grafana + Prometheus**.
 
-## Author
+## Contact
 
-**Nguyen An Phuc**
-| Fresher DevOps Engineer / Network Engineer |
-
-Interested in building secure, automated DevSecOps pipelines and scalable cloud systems.
-
-📧 [phucan2370@gmail.com](mailto:phucan2370@gmail.com)
-🌍 [GitHub](https://github.com/Bel7phegor) | 👉 [LinkedIn](https://www.linkedin.com/in/nguyen-an-phuc/)
+**Author:** Nguyễn An Phúc (@Bel7phegor)
+* **Profiles:** [LinkedIn: nguyen-an-phuc](https://www.linkedin.com/in/nguyen-an-phuc) | [GitHub: Bel7phegor](https://github.com/Bel7phegor) | [Portfolio: anphuc.site](https://anphuc.site)
+* **Email:** [nguyenanphuc12032002@gmail.com](mailto:nguyenanphuc12032002@gmail.com)
